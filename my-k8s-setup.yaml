@@ -17,7 +17,7 @@ spec:
    port: 80
    targetPort: 80
    name: http
-
+   
 ---
 # Deployment: deployment consists of a "Replica Set" (a set of a replicated pod)
 # A "pod" is a collection of containers, which may or may not be the same Docker image
@@ -48,11 +48,11 @@ spec:
         env:
         - name: MY_INLINE_ENV_VAR
           value: "the value of my inline env var"
-
+          
+---
 # ConfigMap: essentially a collection of key-value environment variable definitions
 # which containers may reference (as shown above)
 # Note that a config map is not an appropriate place for secrets
----
 apiVersion: v1
 kind: ConfigMap
 metadata:
