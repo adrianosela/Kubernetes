@@ -1,0 +1,62 @@
+# Service: essentially a load balancer with a static IP
+# It uses a "selector" to select the backend to which it points
+apiVersion: v1
+kind: Service
+metadata:
+ name: my-example-service
+spec:
+ type: LoadBalancer
+ selector:
+     app: my-example-project # selects the back end to load balance
+ ports:
+ - protocol: TCP
+   port: 443
+   targetPort: 443
+   name: https
+ - protocol: TCP
+   port: 80
+   targetPort: 80
+   name: http
+
+---
+# Deployment: deployment consists of a "Replica Set" (a set of a replicated pod)
+# A "pod" is a collection of containers, which may or may not be the same Docker image
+# For example a pod can contain an api container, a web app container, and a db container
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-example-project
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: my-example-project
+  template:
+    metadata:
+      labels:
+        app: my-example-project
+    spec:
+      containers:
+      - name: my-example-api-container
+        image: gcr.io/qubichubdev-adriano/my-sample-image # repository.io/image:tags
+        ports:
+        - containerPort: 80
+        - containerPort: 443
+        envFrom:
+        - configMapRef:
+            name: my-example-configmap
+        env:
+        - name: MY_INLINE_ENV_VAR
+          value: "the value of my inline env var"
+
+# ConfigMap: essentially a collection of key-value environment variable definitions
+# which containers may reference (as shown above)
+# Note that a config map is not an appropriate place for secrets
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: my-example-configmap
+data:
+  EXAMPLE_KEY_A: "this will be an env variable in containers referencing this cm"
+  EXAMPLE_KEY_B: "this too"
